@@ -135,6 +135,12 @@
     margin: 0 auto 20px;
     display: block;
     background: rgba(0, 0, 0, 0.25);
+    transition: opacity 0.5s ease;
+  }
+
+  /* плавная смена картинки */
+  .quiz-card img.fading {
+    opacity: 0;
   }
 
   .quiz-card .question {
@@ -268,11 +274,9 @@
       <img id="q-image" src="img/n1.jpg" alt="Вопрос 1">
       <div class="question" id="q-text">Какая сердцевина у палочки Волан-де-Морта?</div>
 
-      <!-- Обычный режим: кнопка «Ответ» + текстовый ответ -->
       <button class="answer-btn" id="answer-btn">Ответ</button>
       <div class="answer" id="answer">«Перо феникса»</div>
 
-      <!-- Режим с вариантами -->
       <div class="options" id="options"></div>
 
       <button class="next-btn" id="next-btn">Следующий вопрос →</button>
@@ -280,9 +284,6 @@
   </div>
 
 <script>
-  // Данные вопросов.
-  // type: 'reveal'  — кнопка «Ответ» + текстовый ответ
-  // type: 'options' — варианты ответов кнопками, выбираешь один
   const questions = [
     {
       type: 'reveal',
@@ -306,6 +307,20 @@
         { text: 'Бузиновая палочка', correct: false }
       ],
       answer: 'Бузинная палочка'
+    },
+    {
+      type: 'reveal',
+      image: 'img/n4.jpg',
+      question: 'Какой размер у палочки Беллатрисы Лестрейндж?',
+      answer: '12¾ дюйма'
+    },
+    {
+      // особый тип: картинка меняется при показе ответа
+      type: 'reveal-swap',
+      image: 'img/n6.jpg',          // картинка до ответа
+      imageAfter: 'img/n5.jpg',     // картинка после нажатия «Ответ»
+      question: 'Сколько лепестков у золотого яйца из фильма «Гарри Поттер и Кубок огня»?',
+      answer: '3 лепестка'
     }
   ];
 
@@ -323,7 +338,6 @@
   const optionsEl   = document.getElementById('options');
   const nextBtn     = document.getElementById('next-btn');
 
-  // Рендер вопроса
   function renderQuestion(index) {
     const q = questions[index];
 
@@ -332,16 +346,15 @@
     qImage.alt = 'Вопрос ' + (index + 1);
     qText.textContent = q.question;
 
-    // сброс состояния
     answerEl.textContent = q.answer || '';
     answerEl.classList.remove('revealed');
     optionsEl.innerHTML = '';
     optionsEl.classList.remove('visible');
     answerBtn.style.display = 'none';
     nextBtn.classList.remove('visible');
+    qImage.classList.remove('fading');
 
     if (q.type === 'options') {
-      // показать варианты
       optionsEl.classList.add('visible');
       q.options.forEach(opt => {
         const btn = document.createElement('button');
@@ -351,14 +364,11 @@
         optionsEl.appendChild(btn);
       });
     } else {
-      // показать кнопку «Ответ»
       answerBtn.style.display = 'inline-block';
     }
   }
 
-  // Клик по варианту ответа
   function selectOption(clickedBtn, opt, q) {
-    // блокируем все варианты после выбора
     const allBtns = optionsEl.querySelectorAll('.option-btn');
     allBtns.forEach(b => b.disabled = true);
 
@@ -366,17 +376,14 @@
       clickedBtn.classList.add('correct');
     } else {
       clickedBtn.classList.add('wrong');
-      // подсветить правильный вариант
       allBtns.forEach((b, i) => {
         if (q.options[i].correct) b.classList.add('correct');
       });
     }
 
-    // показать кнопку «Следующий вопрос»
     nextBtn.classList.add('visible');
   }
 
-  // Старт теста
   startBtn.addEventListener('click', () => {
     startScreen.classList.add('fade-out');
     setTimeout(() => {
@@ -385,14 +392,25 @@
     }, 250);
   });
 
-  // Показать ответ (для reveal-вопросов)
   answerBtn.addEventListener('click', () => {
+    const q = questions[currentIndex];
+
+    // если у вопроса есть вторая картинка — плавно меняем её
+    if (q.type === 'reveal-swap' && q.imageAfter) {
+      qImage.classList.add('fading');
+      setTimeout(() => {
+        qImage.src = q.imageAfter;
+        qImage.onload = () => qImage.classList.remove('fading');
+        // на случай кэша — снимаем класс и без onload
+        setTimeout(() => qImage.classList.remove('fading'), 50);
+      }, 400);
+    }
+
     answerEl.classList.add('revealed');
     answerBtn.style.display = 'none';
     nextBtn.classList.add('visible');
   });
 
-  // Следующий вопрос
   nextBtn.addEventListener('click', () => {
     if (currentIndex >= questions.length - 1) {
       nextBtn.classList.remove('visible');
