@@ -10,12 +10,31 @@
 
   body {
     font-family: 'Georgia', serif;
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    background-attachment: fixed;
     overflow: hidden;
+    position: relative;
   }
 
-  /* ===== КРЕСТИК В ПРАВОМ ВЕРХНЕМ УГЛУ ===== */
+  /* ===== ФОН fon.jpg с блюром ===== */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -40px; /* запас, чтобы размытие не давало тёмных краёв */
+    background: url('fon.jpg') center / cover no-repeat;
+    filter: blur(4px);        /* слабый блюр */
+    transform: scale(1.05);   /* убираем «просвечивающие» края от блюра */
+    z-index: -2;
+  }
+
+  /* затемняющий слой, чтобы карточки читались */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 8, 25, 0.55);
+    z-index: -1;
+  }
+
+  /* ===== КРЕСТИК ===== */
   #close-btn {
     position: fixed;
     top: 16px;
@@ -291,7 +310,6 @@
 </head>
 <body>
 
-  <!-- Крестик — виден только во время теста -->
   <button id="close-btn" aria-label="Завершить тест">✕</button>
 
   <div id="start-screen">
@@ -406,7 +424,6 @@
       answerBtn.style.display = 'inline-block';
     }
 
-    // на последнем вопросе кнопка становится "Завершить"
     if (index === questions.length - 1) {
       nextBtn.textContent = 'Завершить';
     } else {
@@ -429,24 +446,16 @@
     nextBtn.classList.add('visible');
   }
 
-  // ===== Сброс на главный экран =====
   function resetToStart() {
-    // прячем крестик
     closeBtn.classList.remove('visible');
-
-    // убираем экран вопросов
     quizScreen.classList.remove('show');
-
-    // возвращаем стартовый экран
     startScreen.classList.remove('fade-out');
 
-    // сбрасываем состояние
     currentIndex = 0;
     quizCard.classList.remove('switching', 'entering');
     nextBtn.textContent = 'Следующий вопрос →';
   }
 
-  // ===== Старт теста =====
   startBtn.addEventListener('click', () => {
     startScreen.classList.add('fade-out');
     quizScreen.classList.add('show');
@@ -456,10 +465,8 @@
     renderQuestion(currentIndex);
   });
 
-  // ===== Крестик — завершить на любом этапе =====
   closeBtn.addEventListener('click', resetToStart);
 
-  // ===== Показать ответ =====
   answerBtn.addEventListener('click', () => {
     const q = questions[currentIndex];
 
@@ -495,15 +502,12 @@
     nextBtn.classList.add('visible');
   });
 
-  // ===== Следующий вопрос / Завершить =====
   nextBtn.addEventListener('click', () => {
-    // если это последний вопрос — кнопка "Завершить" возвращает на старт
     if (currentIndex >= questions.length - 1) {
       resetToStart();
       return;
     }
 
-    // фаза 1: карточка уезжает влево
     quizCard.classList.add('switching');
 
     quizCard.addEventListener('transitionend', function onOut(e) {
