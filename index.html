@@ -252,8 +252,36 @@
 
   .answer.revealed {
     opacity: 1;
-    max-height: 100px;
+    max-height: 500px;
     transform: translateY(0);
+  }
+
+  /* ===== список с анимацией прилёта ===== */
+  .answer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    display: inline-block;
+  }
+
+  .answer-list li {
+    opacity: 0;
+    transform: translateX(-40px);
+    padding: 6px 0;
+    color: #c9a227;
+    font-style: italic;
+    font-size: clamp(1rem, 3.3vw, 1.25rem);
+  }
+
+  .answer-list li.fly-in {
+    animation: flyIn 0.5s ease forwards;
+  }
+
+  @keyframes flyIn {
+    0%   { opacity: 0; transform: translateX(-40px); }
+    60%  { opacity: 1; transform: translateX(6px); }
+    100% { opacity: 1; transform: translateX(0); }
   }
 </style>
 </head>
@@ -326,6 +354,34 @@
       imageAfter: 'img/n7.jpg',
       question: 'Какого цвета волшебный глаз у Аластора Грюма?',
       answer: 'Голубой'
+    },
+    {
+      type: 'reveal-list',
+      image: 'img/n9.jpg',
+      question: 'Назовите прозвища четырёх создателей Карты Мародёров в правильном порядке:',
+      answers: ['Лунатик', 'Хвост', 'Бродяга', 'Сохатый']
+    },
+    {
+      type: 'reveal-list',
+      image: 'img/n10.jpg',
+      question: 'Какие три ингредиента были брошены в котел для воскрешения Волан-де-Морта:',
+      answers: [
+        'Кость отца, отданная не по своей воле',
+        'Плоть слуги, отданная добровольно',
+        'Кровь врага, взятая силой'
+      ]
+    },
+    {
+      type: 'reveal-list',
+      image: 'img/n11.jpg',
+      question: 'Назовите три любые заклинания из «Гарри Поттера» на букву «Р»:',
+      answers: ['Ридикулус', 'Редукто', 'Репаро']
+    },
+    {
+      type: 'reveal-list',
+      image: 'img/n12.jpg',
+      question: 'Назови все виды мячей для игры в квиддич:',
+      answers: ['Снитч', 'Квоффл', 'Бладжер']
     }
   ];
 
@@ -351,7 +407,7 @@
     qImage.alt = 'Вопрос ' + (index + 1);
     qText.textContent = q.question;
 
-    answerEl.textContent = q.answer || '';
+    answerEl.innerHTML = '';
     answerEl.classList.remove('revealed');
     optionsEl.innerHTML = '';
     optionsEl.classList.remove('visible');
@@ -409,9 +465,34 @@
       }, 400);
     }
 
+    if (q.type === 'reveal' || q.type === 'reveal-swap') {
+      answerEl.textContent = q.answer;
+    }
+
+    if (q.type === 'reveal-list') {
+      answerEl.innerHTML = '';
+      const ul = document.createElement('ul');
+      ul.className = 'answer-list';
+      q.answers.forEach((text, i) => {
+        const li = document.createElement('li');
+        li.textContent = text + (i < q.answers.length - 1 ? ';' : '');
+        ul.appendChild(li);
+      });
+      answerEl.appendChild(ul);
+    }
+
     answerEl.classList.add('revealed');
     answerBtn.style.display = 'none';
     nextBtn.classList.add('visible');
+
+    if (q.type === 'reveal-list') {
+      setTimeout(() => {
+        const items = answerEl.querySelectorAll('.answer-list li');
+        items.forEach((li, i) => {
+          setTimeout(() => li.classList.add('fly-in'), i * 300);
+        });
+      }, 100);
+    }
   });
 
   nextBtn.addEventListener('click', () => {
