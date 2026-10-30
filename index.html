@@ -107,6 +107,7 @@
     box-shadow: 0 0 30px rgba(201, 162, 39, 0.4),
                 inset 0 0 20px rgba(201, 162, 39, 0.15);
     text-align: center;
+    margin: auto;
   }
 
   .quiz-card .q-number {
@@ -119,12 +120,15 @@
 
   .quiz-card img {
     width: 100%;
-    max-height: 320px;
-    object-fit: cover;
+    max-width: 300px;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    object-fit: contain;
     border-radius: 14px;
     border: 2px solid rgba(201, 162, 39, 0.6);
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
     display: block;
+    background: rgba(0, 0, 0, 0.25);
   }
 
   .quiz-card .question {
@@ -203,9 +207,7 @@
   const answer = document.getElementById('answer');
 
   startBtn.addEventListener('click', () => {
-    // анимация ухода стартового экрана
     startScreen.classList.add('fade-out');
-    // показ экрана вопроса (с задержкой, чтобы сработала анимация)
     setTimeout(() => {
       quizScreen.classList.add('show');
     }, 250);
@@ -213,7 +215,7 @@
 
   answerBtn.addEventListener('click', () => {
     answer.classList.add('revealed');
-    answerBtn.style.display = 'none'; // кнопка исчезает после показа ответа
+    answerBtn.style.display = 'none';
   });
 </script>
 </body>
