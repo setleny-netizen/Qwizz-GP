@@ -111,7 +111,6 @@
     transition: opacity 0.4s ease, transform 0.4s ease;
   }
 
-  /* анимация смены вопроса */
   .quiz-card.switching {
     opacity: 0;
     transform: translateX(-40px);
@@ -144,6 +143,55 @@
     line-height: 1.4;
     margin-bottom: 22px;
     text-shadow: 0 0 8px rgba(201, 162, 39, 0.5);
+  }
+
+  /* ===== варианты ответов ===== */
+  .options {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .options.visible {
+    display: flex;
+  }
+
+  .option-btn {
+    font-family: inherit;
+    font-size: clamp(0.9rem, 3vw, 1.05rem);
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 2px solid rgba(201, 162, 39, 0.6);
+    background: rgba(201, 162, 39, 0.05);
+    color: #f5e6c8;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  }
+
+  .option-btn:hover {
+    background: rgba(201, 162, 39, 0.18);
+  }
+
+  .option-btn:active {
+    transform: scale(0.98);
+  }
+
+  .option-btn.correct {
+    background: rgba(46, 160, 67, 0.35);
+    border-color: #2ea043;
+    color: #eaffea;
+  }
+
+  .option-btn.wrong {
+    background: rgba(180, 40, 40, 0.35);
+    border-color: #b42828;
+    color: #ffecec;
+  }
+
+  .option-btn:disabled {
+    cursor: default;
   }
 
   .answer-btn,
@@ -219,24 +267,45 @@
       <div class="q-number" id="q-number">Вопрос #1</div>
       <img id="q-image" src="img/n1.jpg" alt="Вопрос 1">
       <div class="question" id="q-text">Какая сердцевина у палочки Волан-де-Морта?</div>
+
+      <!-- Обычный режим: кнопка «Ответ» + текстовый ответ -->
       <button class="answer-btn" id="answer-btn">Ответ</button>
       <div class="answer" id="answer">«Перо феникса»</div>
+
+      <!-- Режим с вариантами -->
+      <div class="options" id="options"></div>
+
       <button class="next-btn" id="next-btn">Следующий вопрос →</button>
     </div>
   </div>
 
 <script>
-  // Данные вопросов
+  // Данные вопросов.
+  // type: 'reveal'  — кнопка «Ответ» + текстовый ответ
+  // type: 'options' — варианты ответов кнопками, выбираешь один
   const questions = [
     {
+      type: 'reveal',
       image: 'img/n1.jpg',
       question: 'Какая сердцевина у палочки Волан-де-Морта?',
       answer: '«Перо феникса»'
     },
     {
+      type: 'reveal',
       image: 'img/n2.jpg',
       question: 'Из какой породы дерева палочки Люциуса Малфоя?',
       answer: 'Вяз'
+    },
+    {
+      type: 'options',
+      image: 'img/n3.jpg',
+      question: 'Выбери правильное название:',
+      options: [
+        { text: 'Бузинная палочка', correct: true },
+        { text: 'Бузиная палочка',  correct: false },
+        { text: 'Бузиновая палочка', correct: false }
+      ],
+      answer: 'Бузинная палочка'
     }
   ];
 
@@ -251,19 +320,60 @@
   const qText       = document.getElementById('q-text');
   const answerBtn   = document.getElementById('answer-btn');
   const answerEl    = document.getElementById('answer');
+  const optionsEl   = document.getElementById('options');
   const nextBtn     = document.getElementById('next-btn');
 
-  // Рендер текущего вопроса
+  // Рендер вопроса
   function renderQuestion(index) {
     const q = questions[index];
+
     qNumber.textContent = 'Вопрос #' + (index + 1);
     qImage.src = q.image;
     qImage.alt = 'Вопрос ' + (index + 1);
     qText.textContent = q.question;
-    answerEl.textContent = q.answer;
+
+    // сброс состояния
+    answerEl.textContent = q.answer || '';
     answerEl.classList.remove('revealed');
-    answerBtn.style.display = 'inline-block';
+    optionsEl.innerHTML = '';
+    optionsEl.classList.remove('visible');
+    answerBtn.style.display = 'none';
     nextBtn.classList.remove('visible');
+
+    if (q.type === 'options') {
+      // показать варианты
+      optionsEl.classList.add('visible');
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt.text;
+        btn.addEventListener('click', () => selectOption(btn, opt, q));
+        optionsEl.appendChild(btn);
+      });
+    } else {
+      // показать кнопку «Ответ»
+      answerBtn.style.display = 'inline-block';
+    }
+  }
+
+  // Клик по варианту ответа
+  function selectOption(clickedBtn, opt, q) {
+    // блокируем все варианты после выбора
+    const allBtns = optionsEl.querySelectorAll('.option-btn');
+    allBtns.forEach(b => b.disabled = true);
+
+    if (opt.correct) {
+      clickedBtn.classList.add('correct');
+    } else {
+      clickedBtn.classList.add('wrong');
+      // подсветить правильный вариант
+      allBtns.forEach((b, i) => {
+        if (q.options[i].correct) b.classList.add('correct');
+      });
+    }
+
+    // показать кнопку «Следующий вопрос»
+    nextBtn.classList.add('visible');
   }
 
   // Старт теста
@@ -271,10 +381,11 @@
     startScreen.classList.add('fade-out');
     setTimeout(() => {
       quizScreen.classList.add('show');
+      renderQuestion(currentIndex);
     }, 250);
   });
 
-  // Показать ответ
+  // Показать ответ (для reveal-вопросов)
   answerBtn.addEventListener('click', () => {
     answerEl.classList.add('revealed');
     answerBtn.style.display = 'none';
@@ -283,25 +394,22 @@
 
   // Следующий вопрос
   nextBtn.addEventListener('click', () => {
-    // если это последний вопрос — прячем кнопку «следующий»
     if (currentIndex >= questions.length - 1) {
       nextBtn.classList.remove('visible');
       nextBtn.textContent = 'Тест завершён';
       return;
     }
 
-    // анимация смены: карточка уезжает влево и исчезает
     quizCard.classList.add('switching');
 
     setTimeout(() => {
       currentIndex++;
       renderQuestion(currentIndex);
-      // возвращаем карточку справа и плавно показываем
+
       quizCard.style.transition = 'none';
       quizCard.style.transform = 'translateX(40px)';
       quizCard.style.opacity = '0';
 
-      // форсируем reflow, чтобы браузер применил стартовое состояние
       void quizCard.offsetWidth;
 
       quizCard.style.transition = '';
