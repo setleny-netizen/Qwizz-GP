@@ -15,6 +15,41 @@
     overflow: hidden;
   }
 
+  /* ===== КРЕСТИК В ПРАВОМ ВЕРХНЕМ УГЛУ ===== */
+  #close-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid rgba(201, 162, 39, 0.7);
+    background: rgba(20, 15, 40, 0.6);
+    color: #f5e6c8;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, transform 0.3s ease,
+                background 0.2s ease, box-shadow 0.2s ease;
+  }
+  #close-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+  #close-btn:hover {
+    background: rgba(201, 162, 39, 0.25);
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.6);
+  }
+  #close-btn:active { transform: scale(0.92); }
+
   /* ===== ЭКРАН 1 ===== */
   #start-screen {
     position: fixed;
@@ -189,7 +224,6 @@
   .answer-btn:active,
   .next-btn:active { transform: scale(0.96); }
 
-  /* ==== КНОПКА "СЛЕДУЮЩИЙ" — плавное появление ==== */
   .next-btn {
     display: inline-block;
     margin-top: 20px;
@@ -204,7 +238,6 @@
     pointer-events: auto;
   }
 
-  /* ==== БЛОК ОТВЕТА — плавно через grid, без max-height ==== */
   .answer {
     display: grid;
     grid-template-rows: 0fr;
@@ -225,7 +258,6 @@
   }
   .answer > .answer-inner { min-height: 0; }
 
-  /* ===== список с анимацией прилёта (чистый CSS delay) ===== */
   .answer-list {
     list-style: none;
     padding: 0;
@@ -241,7 +273,6 @@
     font-style: italic;
     font-size: clamp(1rem, 3.3vw, 1.25rem);
   }
-  /* ключевая вещь: анимация запускается при .revealed, delay по индексу */
   .answer.revealed .answer-list li {
     animation: flyIn 0.4s ease forwards;
   }
@@ -259,6 +290,9 @@
 </style>
 </head>
 <body>
+
+  <!-- Крестик — виден только во время теста -->
+  <button id="close-btn" aria-label="Завершить тест">✕</button>
 
   <div id="start-screen">
     <button class="card-btn" id="start-btn">
@@ -332,6 +366,7 @@
   const startScreen = document.getElementById('start-screen');
   const quizScreen  = document.getElementById('quiz-screen');
   const startBtn    = document.getElementById('start-btn');
+  const closeBtn    = document.getElementById('close-btn');
   const quizCard    = document.getElementById('quiz-card');
   const qNumber     = document.getElementById('q-number');
   const qImage      = document.getElementById('q-image');
@@ -353,10 +388,8 @@
 
     answerInner.innerHTML = '';
     answerEl.classList.remove('revealed');
-
     optionsEl.innerHTML = '';
     optionsEl.classList.remove('visible');
-
     answerBtn.style.display = 'none';
     nextBtn.classList.remove('visible');
 
@@ -371,6 +404,13 @@
       });
     } else {
       answerBtn.style.display = 'inline-block';
+    }
+
+    // на последнем вопросе кнопка становится "Завершить"
+    if (index === questions.length - 1) {
+      nextBtn.textContent = 'Завершить';
+    } else {
+      nextBtn.textContent = 'Следующий вопрос →';
     }
   }
 
@@ -389,24 +429,47 @@
     nextBtn.classList.add('visible');
   }
 
+  // ===== Сброс на главный экран =====
+  function resetToStart() {
+    // прячем крестик
+    closeBtn.classList.remove('visible');
+
+    // убираем экран вопросов
+    quizScreen.classList.remove('show');
+
+    // возвращаем стартовый экран
+    startScreen.classList.remove('fade-out');
+
+    // сбрасываем состояние
+    currentIndex = 0;
+    quizCard.classList.remove('switching', 'entering');
+    nextBtn.textContent = 'Следующий вопрос →';
+  }
+
+  // ===== Старт теста =====
   startBtn.addEventListener('click', () => {
     startScreen.classList.add('fade-out');
     quizScreen.classList.add('show');
+    closeBtn.classList.add('visible');
+
+    currentIndex = 0;
+    renderQuestion(currentIndex);
   });
 
+  // ===== Крестик — завершить на любом этапе =====
+  closeBtn.addEventListener('click', resetToStart);
+
+  // ===== Показать ответ =====
   answerBtn.addEventListener('click', () => {
     const q = questions[currentIndex];
 
-    // плавная замена картинки через transitionend (без магических таймеров)
     if (q.type === 'reveal-swap' && q.imageAfter) {
       qImage.classList.add('fading');
       qImage.addEventListener('transitionend', function onFade(e) {
         if (e.propertyName !== 'opacity') return;
         qImage.removeEventListener('transitionend', onFade);
-
         qImage.onload = () => qImage.classList.remove('fading');
         qImage.src = q.imageAfter;
-        // если картинка уже в кэше — onload может не сработать
         if (qImage.complete) qImage.classList.remove('fading');
       });
     }
@@ -427,36 +490,32 @@
       answerInner.appendChild(ul);
     }
 
-    // одно изменение класса запускает и раскрытие блока, и каскад анимации списка
     answerEl.classList.add('revealed');
     answerBtn.style.display = 'none';
     nextBtn.classList.add('visible');
   });
 
+  // ===== Следующий вопрос / Завершить =====
   nextBtn.addEventListener('click', () => {
+    // если это последний вопрос — кнопка "Завершить" возвращает на старт
     if (currentIndex >= questions.length - 1) {
-      nextBtn.classList.remove('visible');
-      nextBtn.textContent = 'Тест завершён';
+      resetToStart();
       return;
     }
 
-    // фаза 1: карточка уезжает влево (чистый transition)
+    // фаза 1: карточка уезжает влево
     quizCard.classList.add('switching');
 
     quizCard.addEventListener('transitionend', function onOut(e) {
       if (e.propertyName !== 'opacity') return;
       quizCard.removeEventListener('transitionend', onOut);
 
-      // мгновенно меняем контент и ставим «входящее» состояние
       currentIndex++;
       renderQuestion(currentIndex);
+
       quizCard.classList.remove('switching');
       quizCard.classList.add('entering');
-
-      // форсируем reflow, чтобы браузер зафиксировал entering-состояние
       void quizCard.offsetWidth;
-
-      // фаза 2: карточка приезжает справа
       quizCard.classList.remove('entering');
     });
   });
