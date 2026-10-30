@@ -138,7 +138,6 @@
     transition: opacity 0.5s ease;
   }
 
-  /* плавная смена картинки */
   .quiz-card img.fading {
     opacity: 0;
   }
@@ -315,12 +314,18 @@
       answer: '12¾ дюйма'
     },
     {
-      // особый тип: картинка меняется при показе ответа
       type: 'reveal-swap',
-      image: 'img/n6.jpg',          // картинка до ответа
-      imageAfter: 'img/n5.jpg',     // картинка после нажатия «Ответ»
+      image: 'img/n6.jpg',
+      imageAfter: 'img/n5.jpg',
       question: 'Сколько лепестков у золотого яйца из фильма «Гарри Поттер и Кубок огня»?',
       answer: '3 лепестка'
+    },
+    {
+      type: 'reveal-swap',
+      image: 'img/n8.jpg',
+      imageAfter: 'img/n7.jpg',
+      question: 'Какого цвета волшебный глаз у Аластора Грюма?',
+      answer: 'Голубой'
     }
   ];
 
@@ -395,13 +400,11 @@
   answerBtn.addEventListener('click', () => {
     const q = questions[currentIndex];
 
-    // если у вопроса есть вторая картинка — плавно меняем её
     if (q.type === 'reveal-swap' && q.imageAfter) {
       qImage.classList.add('fading');
       setTimeout(() => {
         qImage.src = q.imageAfter;
         qImage.onload = () => qImage.classList.remove('fading');
-        // на случай кэша — снимаем класс и без onload
         setTimeout(() => qImage.classList.remove('fading'), 50);
       }, 400);
     }
