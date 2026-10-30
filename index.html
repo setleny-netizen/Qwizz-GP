@@ -5,15 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Тест по Гарри Поттеру</title>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    height: 100%;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
 
   body {
     font-family: 'Georgia', serif;
@@ -22,7 +15,7 @@
     overflow: hidden;
   }
 
-  /* ===== ЭКРАН 1: стартовая кнопка ===== */
+  /* ===== ЭКРАН 1 ===== */
   #start-screen {
     position: fixed;
     inset: 0;
@@ -30,13 +23,12 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition: opacity 0.45s ease, transform 0.45s ease;
     z-index: 2;
   }
-
   #start-screen.fade-out {
     opacity: 0;
-    transform: scale(1.15);
+    transform: scale(1.1);
     pointer-events: none;
   }
 
@@ -52,19 +44,14 @@
     text-align: center;
     cursor: pointer;
     font-family: inherit;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-
   .card-btn:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 0 45px rgba(201, 162, 39, 0.7),
                 inset 0 0 25px rgba(201, 162, 39, 0.25);
   }
-
-  .card-btn:active {
-    transform: scale(0.98);
-  }
-
+  .card-btn:active { transform: scale(0.98); }
   .card-btn h1 {
     color: #f5e6c8;
     font-size: clamp(1.3rem, 5vw, 2.2rem);
@@ -84,12 +71,11 @@
     padding: 20px;
     overflow-y: auto;
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
     pointer-events: none;
-    transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+    transition: opacity 0.45s ease, transform 0.45s ease;
     z-index: 1;
   }
-
   #quiz-screen.show {
     opacity: 1;
     transform: translateY(0);
@@ -108,12 +94,15 @@
                 inset 0 0 20px rgba(201, 162, 39, 0.15);
     text-align: center;
     margin: auto;
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition: opacity 0.35s ease, transform 0.35s ease;
   }
-
   .quiz-card.switching {
     opacity: 0;
-    transform: translateX(-40px);
+    transform: translateX(-30px);
+  }
+  .quiz-card.entering {
+    opacity: 0;
+    transform: translateX(30px);
   }
 
   .quiz-card .q-number {
@@ -135,12 +124,9 @@
     margin: 0 auto 20px;
     display: block;
     background: rgba(0, 0, 0, 0.25);
-    transition: opacity 0.5s ease;
+    transition: opacity 0.35s ease;
   }
-
-  .quiz-card img.fading {
-    opacity: 0;
-  }
+  .quiz-card img.fading { opacity: 0; }
 
   .quiz-card .question {
     color: #f5e6c8;
@@ -157,10 +143,7 @@
     gap: 12px;
     margin-bottom: 10px;
   }
-
-  .options.visible {
-    display: flex;
-  }
+  .options.visible { display: flex; }
 
   .option-btn {
     font-family: inherit;
@@ -172,32 +155,21 @@
     color: #f5e6c8;
     cursor: pointer;
     text-align: left;
-    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease, color 0.2s ease;
   }
-
-  .option-btn:hover {
-    background: rgba(201, 162, 39, 0.18);
-  }
-
-  .option-btn:active {
-    transform: scale(0.98);
-  }
-
+  .option-btn:hover { background: rgba(201, 162, 39, 0.18); }
+  .option-btn:active { transform: scale(0.98); }
   .option-btn.correct {
     background: rgba(46, 160, 67, 0.35);
     border-color: #2ea043;
     color: #eaffea;
   }
-
   .option-btn.wrong {
     background: rgba(180, 40, 40, 0.35);
     border-color: #b42828;
     color: #ffecec;
   }
-
-  .option-btn:disabled {
-    cursor: default;
-  }
+  .option-btn:disabled { cursor: default; }
 
   .answer-btn,
   .next-btn {
@@ -210,53 +182,50 @@
     background: transparent;
     color: #f5e6c8;
     cursor: pointer;
-    transition: background 0.25s ease, transform 0.2s ease, opacity 0.4s ease;
+    transition: background 0.2s ease, transform 0.15s ease;
   }
-
   .answer-btn:hover,
-  .next-btn:hover {
-    background: rgba(201, 162, 39, 0.2);
-  }
-
+  .next-btn:hover { background: rgba(201, 162, 39, 0.2); }
   .answer-btn:active,
-  .next-btn:active {
-    transform: scale(0.96);
-  }
+  .next-btn:active { transform: scale(0.96); }
 
+  /* ==== КНОПКА "СЛЕДУЮЩИЙ" — плавное появление ==== */
   .next-btn {
-    display: none;
-    margin-top: 20px;
-  }
-
-  .next-btn.visible {
     display: inline-block;
-    animation: fadeInUp 0.5s ease both;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .next-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
+  /* ==== БЛОК ОТВЕТА — плавно через grid, без max-height ==== */
   .answer {
+    display: grid;
+    grid-template-rows: 0fr;
+    margin-top: 0;
+    opacity: 0;
     color: #c9a227;
     font-size: clamp(1.1rem, 3.5vw, 1.35rem);
     font-style: italic;
-    margin-top: 20px;
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(10px);
-    transition: opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, margin-top 0.5s ease;
+    transition: grid-template-rows 0.4s ease,
+                opacity 0.3s ease,
+                margin-top 0.4s ease;
     overflow: hidden;
   }
-
   .answer.revealed {
+    grid-template-rows: 1fr;
     opacity: 1;
-    max-height: 500px;
-    transform: translateY(0);
+    margin-top: 20px;
   }
+  .answer > .answer-inner { min-height: 0; }
 
-  /* ===== список с анимацией прилёта ===== */
+  /* ===== список с анимацией прилёта (чистый CSS delay) ===== */
   .answer-list {
     list-style: none;
     padding: 0;
@@ -264,37 +233,39 @@
     text-align: left;
     display: inline-block;
   }
-
   .answer-list li {
     opacity: 0;
-    transform: translateX(-40px);
+    transform: translateX(-30px);
     padding: 6px 0;
     color: #c9a227;
     font-style: italic;
     font-size: clamp(1rem, 3.3vw, 1.25rem);
   }
-
-  .answer-list li.fly-in {
-    animation: flyIn 0.5s ease forwards;
+  /* ключевая вещь: анимация запускается при .revealed, delay по индексу */
+  .answer.revealed .answer-list li {
+    animation: flyIn 0.4s ease forwards;
   }
+  .answer.revealed .answer-list li:nth-child(1) { animation-delay: 0.00s; }
+  .answer.revealed .answer-list li:nth-child(2) { animation-delay: 0.12s; }
+  .answer.revealed .answer-list li:nth-child(3) { animation-delay: 0.24s; }
+  .answer.revealed .answer-list li:nth-child(4) { animation-delay: 0.36s; }
+  .answer.revealed .answer-list li:nth-child(5) { animation-delay: 0.48s; }
 
   @keyframes flyIn {
-    0%   { opacity: 0; transform: translateX(-40px); }
-    60%  { opacity: 1; transform: translateX(6px); }
+    0%   { opacity: 0; transform: translateX(-30px); }
+    60%  { opacity: 1; transform: translateX(4px); }
     100% { opacity: 1; transform: translateX(0); }
   }
 </style>
 </head>
 <body>
 
-  <!-- Стартовый экран-кнопка -->
   <div id="start-screen">
     <button class="card-btn" id="start-btn">
       <h1>Тест по Гарри Поттеру №1</h1>
     </button>
   </div>
 
-  <!-- Экран вопроса -->
   <div id="quiz-screen">
     <div class="quiz-card" id="quiz-card">
       <div class="q-number" id="q-number">Вопрос #1</div>
@@ -302,7 +273,10 @@
       <div class="question" id="q-text">Какая сердцевина у палочки Волан-де-Морта?</div>
 
       <button class="answer-btn" id="answer-btn">Ответ</button>
-      <div class="answer" id="answer">«Перо феникса»</div>
+
+      <div class="answer" id="answer">
+        <div class="answer-inner" id="answer-inner"></div>
+      </div>
 
       <div class="options" id="options"></div>
 
@@ -312,77 +286,45 @@
 
 <script>
   const questions = [
-    {
-      type: 'reveal',
-      image: 'img/n1.jpg',
-      question: 'Какая сердцевина у палочки Волан-де-Морта?',
-      answer: '«Перо феникса»'
-    },
-    {
-      type: 'reveal',
-      image: 'img/n2.jpg',
-      question: 'Из какой породы дерева палочки Люциуса Малфоя?',
-      answer: 'Вяз'
-    },
-    {
-      type: 'options',
-      image: 'img/n3.jpg',
-      question: 'Выбери правильное название:',
-      options: [
-        { text: 'Бузинная палочка', correct: true },
-        { text: 'Бузиная палочка',  correct: false },
-        { text: 'Бузиновая палочка', correct: false }
+    { type:'reveal', image:'img/n1.jpg',
+      question:'Какая сердцевина у палочки Волан-де-Морта?',
+      answer:'«Перо феникса»' },
+    { type:'reveal', image:'img/n2.jpg',
+      question:'Из какой породы дерева палочки Люциуса Малфоя?',
+      answer:'Вяз' },
+    { type:'options', image:'img/n3.jpg',
+      question:'Выбери правильное название:',
+      options:[
+        {text:'Бузинная палочка', correct:true},
+        {text:'Бузиная палочка',  correct:false},
+        {text:'Бузиновая палочка', correct:false}
       ],
-      answer: 'Бузинная палочка'
-    },
-    {
-      type: 'reveal',
-      image: 'img/n4.jpg',
-      question: 'Какой размер у палочки Беллатрисы Лестрейндж?',
-      answer: '12¾ дюйма'
-    },
-    {
-      type: 'reveal-swap',
-      image: 'img/n6.jpg',
-      imageAfter: 'img/n5.jpg',
-      question: 'Сколько лепестков у золотого яйца из фильма «Гарри Поттер и Кубок огня»?',
-      answer: '3 лепестка'
-    },
-    {
-      type: 'reveal-swap',
-      image: 'img/n8.jpg',
-      imageAfter: 'img/n7.jpg',
-      question: 'Какого цвета волшебный глаз у Аластора Грюма?',
-      answer: 'Голубой'
-    },
-    {
-      type: 'reveal-list',
-      image: 'img/n9.jpg',
-      question: 'Назовите прозвища четырёх создателей Карты Мародёров в правильном порядке:',
-      answers: ['Лунатик', 'Хвост', 'Бродяга', 'Сохатый']
-    },
-    {
-      type: 'reveal-list',
-      image: 'img/n10.jpg',
-      question: 'Какие три ингредиента были брошены в котел для воскрешения Волан-де-Морта:',
-      answers: [
+      answer:'Бузинная палочка' },
+    { type:'reveal', image:'img/n4.jpg',
+      question:'Какой размер у палочки Беллатрисы Лестрейндж?',
+      answer:'12¾ дюйма' },
+    { type:'reveal-swap', image:'img/n6.jpg', imageAfter:'img/n5.jpg',
+      question:'Сколько лепестков у золотого яйца из фильма «Гарри Поттер и Кубок огня»?',
+      answer:'3 лепестка' },
+    { type:'reveal-swap', image:'img/n8.jpg', imageAfter:'img/n7.jpg',
+      question:'Какого цвета волшебный глаз у Аластора Грюма?',
+      answer:'Голубой' },
+    { type:'reveal-list', image:'img/n9.jpg',
+      question:'Назовите прозвища четырёх создателей Карты Мародёров в правильном порядке:',
+      answers:['Лунатик','Хвост','Бродяга','Сохатый'] },
+    { type:'reveal-list', image:'img/n10.jpg',
+      question:'Какие три ингредиента были брошены в котел для воскрешения Волан-де-Морта:',
+      answers:[
         'Кость отца, отданная не по своей воле',
         'Плоть слуги, отданная добровольно',
         'Кровь врага, взятая силой'
-      ]
-    },
-    {
-      type: 'reveal-list',
-      image: 'img/n11.jpg',
-      question: 'Назовите три любые заклинания из «Гарри Поттера» на букву «Р»:',
-      answers: ['Ридикулус', 'Редукто', 'Репаро']
-    },
-    {
-      type: 'reveal-list',
-      image: 'img/n12.jpg',
-      question: 'Назови все виды мячей для игры в квиддич:',
-      answers: ['Снитч', 'Квоффл', 'Бладжер']
-    }
+      ] },
+    { type:'reveal-list', image:'img/n11.jpg',
+      question:'Назовите три любые заклинания из «Гарри Поттера» на букву «Р»:',
+      answers:['Ридикулус','Редукто','Репаро'] },
+    { type:'reveal-list', image:'img/n12.jpg',
+      question:'Назови все виды мячей для игры в квиддич:',
+      answers:['Снитч','Квоффл','Бладжер'] }
   ];
 
   let currentIndex = 0;
@@ -396,6 +338,7 @@
   const qText       = document.getElementById('q-text');
   const answerBtn   = document.getElementById('answer-btn');
   const answerEl    = document.getElementById('answer');
+  const answerInner = document.getElementById('answer-inner');
   const optionsEl   = document.getElementById('options');
   const nextBtn     = document.getElementById('next-btn');
 
@@ -405,15 +348,17 @@
     qNumber.textContent = 'Вопрос #' + (index + 1);
     qImage.src = q.image;
     qImage.alt = 'Вопрос ' + (index + 1);
+    qImage.classList.remove('fading');
     qText.textContent = q.question;
 
-    answerEl.innerHTML = '';
+    answerInner.innerHTML = '';
     answerEl.classList.remove('revealed');
+
     optionsEl.innerHTML = '';
     optionsEl.classList.remove('visible');
+
     answerBtn.style.display = 'none';
     nextBtn.classList.remove('visible');
-    qImage.classList.remove('fading');
 
     if (q.type === 'options') {
       optionsEl.classList.add('visible');
@@ -441,36 +386,36 @@
         if (q.options[i].correct) b.classList.add('correct');
       });
     }
-
     nextBtn.classList.add('visible');
   }
 
   startBtn.addEventListener('click', () => {
     startScreen.classList.add('fade-out');
-    setTimeout(() => {
-      quizScreen.classList.add('show');
-      renderQuestion(currentIndex);
-    }, 250);
+    quizScreen.classList.add('show');
   });
 
   answerBtn.addEventListener('click', () => {
     const q = questions[currentIndex];
 
+    // плавная замена картинки через transitionend (без магических таймеров)
     if (q.type === 'reveal-swap' && q.imageAfter) {
       qImage.classList.add('fading');
-      setTimeout(() => {
-        qImage.src = q.imageAfter;
+      qImage.addEventListener('transitionend', function onFade(e) {
+        if (e.propertyName !== 'opacity') return;
+        qImage.removeEventListener('transitionend', onFade);
+
         qImage.onload = () => qImage.classList.remove('fading');
-        setTimeout(() => qImage.classList.remove('fading'), 50);
-      }, 400);
+        qImage.src = q.imageAfter;
+        // если картинка уже в кэше — onload может не сработать
+        if (qImage.complete) qImage.classList.remove('fading');
+      });
     }
 
     if (q.type === 'reveal' || q.type === 'reveal-swap') {
-      answerEl.textContent = q.answer;
+      answerInner.textContent = q.answer;
     }
 
     if (q.type === 'reveal-list') {
-      answerEl.innerHTML = '';
       const ul = document.createElement('ul');
       ul.className = 'answer-list';
       q.answers.forEach((text, i) => {
@@ -478,21 +423,14 @@
         li.textContent = text + (i < q.answers.length - 1 ? ';' : '');
         ul.appendChild(li);
       });
-      answerEl.appendChild(ul);
+      answerInner.innerHTML = '';
+      answerInner.appendChild(ul);
     }
 
+    // одно изменение класса запускает и раскрытие блока, и каскад анимации списка
     answerEl.classList.add('revealed');
     answerBtn.style.display = 'none';
     nextBtn.classList.add('visible');
-
-    if (q.type === 'reveal-list') {
-      setTimeout(() => {
-        const items = answerEl.querySelectorAll('.answer-list li');
-        items.forEach((li, i) => {
-          setTimeout(() => li.classList.add('fly-in'), i * 300);
-        });
-      }, 100);
-    }
   });
 
   nextBtn.addEventListener('click', () => {
@@ -502,23 +440,25 @@
       return;
     }
 
+    // фаза 1: карточка уезжает влево (чистый transition)
     quizCard.classList.add('switching');
 
-    setTimeout(() => {
+    quizCard.addEventListener('transitionend', function onOut(e) {
+      if (e.propertyName !== 'opacity') return;
+      quizCard.removeEventListener('transitionend', onOut);
+
+      // мгновенно меняем контент и ставим «входящее» состояние
       currentIndex++;
       renderQuestion(currentIndex);
+      quizCard.classList.remove('switching');
+      quizCard.classList.add('entering');
 
-      quizCard.style.transition = 'none';
-      quizCard.style.transform = 'translateX(40px)';
-      quizCard.style.opacity = '0';
-
+      // форсируем reflow, чтобы браузер зафиксировал entering-состояние
       void quizCard.offsetWidth;
 
-      quizCard.style.transition = '';
-      quizCard.classList.remove('switching');
-      quizCard.style.transform = '';
-      quizCard.style.opacity = '';
-    }, 400);
+      // фаза 2: карточка приезжает справа
+      quizCard.classList.remove('entering');
+    });
   });
 </script>
 </body>
